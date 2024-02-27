@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.urls import path
 from zaiapp.views import wszystkie, szczegoly
+
 urlpatterns = [
-    path("wszystkie/", wszystkie),
-    path("szczegoly/", szczegoly),
+    path('wszystkie/', wszystkie),
+    path('szczegoly/<int:film_id>/', szczegoly)
 ]
+
