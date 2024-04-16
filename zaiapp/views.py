@@ -1,9 +1,12 @@
 from django.contrib.auth.models import User
+from rest_framework.response import Response
+
 from .models import Film, ExtraInfo, Ocena, Aktor
 from .serializers import FilmModelSerializer, ExtraInfoSerializer, OcenaSerializer, AktorSerializer, UserSerializer
-from rest_framework import generics, filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework import generics, filters, status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, DjangoModelPermissions
 from .permissions import IsOwnerOrReadOnly
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 class FilmCreateList(generics.ListCreateAPIView):
@@ -64,10 +67,11 @@ class AktorRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserCreateList(generics.ListCreateAPIView):
+    permission_classes = [DjangoModelPermissions]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-
 class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [DjangoModelPermissions]
     queryset = User.objects.all()
     serializer_class = UserSerializer

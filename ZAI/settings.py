@@ -42,6 +42,7 @@ REST_FRAMEWORK = {
 
 INSTALLED_APPS = [
     'rest_framework',
+    'rest_framework.authtoken',
     "zaiapp.apps.ZaiappConfig",
     "django.contrib.admin",
     "django.contrib.auth",
