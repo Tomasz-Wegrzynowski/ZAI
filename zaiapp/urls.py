@@ -18,10 +18,12 @@ Including another URLconf
 
 from .views import FilmCreateList, FilmRetrieveUpdateDestroy,  ExtraInfoCreateList, ExtraInfoRetrieveUpdateDestroy, \
     OcenaCreateList, OcenaRetrieveUpdateDestroy, AktorCreateList, AktorRetrieveUpdateDestroy, \
-    UserCreateList, UserRetrieveUpdateDestroy
+    UserCreateList, UserRetrieveUpdateDestroy, statRezyserLiczbaFilmow, statFilmyLiczbaOcen, statFilmyBezOcen, statFilmyKategorieDobrySlaby, statFilmyGwiazdkiMaxMin
 from django.urls import path
+from . import views
 
 urlpatterns = [
+    path('api/', views.api_root, name='api-root'),
     path('filmy/', FilmCreateList.as_view(), name= 'FilmCreateList'),
     path('filmy/<int:pk>/', FilmRetrieveUpdateDestroy.as_view(), name= 'FilmRetrieveUpdateDestroy'),
     path('extrainfo/', ExtraInfoCreateList.as_view(), name='ExtraInfoCreateList'),
@@ -31,6 +33,12 @@ urlpatterns = [
     path('aktor/', AktorCreateList.as_view(), name='AktorCreateList'),
     path('aktor/<int:pk>/', AktorRetrieveUpdateDestroy.as_view(), name='AktorRetrieveUpdateDestroy'),
     path('user/', UserCreateList.as_view(), name='UserCreateList'),
-    path('user/<int:pk>/', UserRetrieveUpdateDestroy.as_view(), name='UserRetrieveUpdateDestroy')
+    path('user/<int:pk>/', UserRetrieveUpdateDestroy.as_view(), name='UserRetrieveUpdateDestroy'),
+    path('statRezyserLiczbaFilmow/', statRezyserLiczbaFilmow.as_view(), name='statRezyserLiczbaFilmow'),
+    path('statFilmyLiczbaOcen/', statFilmyLiczbaOcen.as_view(), name='statFilmyLiczbaOcen'),
+    path('statFilmyBezOcen/', statFilmyBezOcen.as_view(), name='statFilmyBezOcen'),
+    path('statFilmyDobrySlaby/', statFilmyKategorieDobrySlaby.as_view(), name='statFilmyKategorieDobrySlaby'),
+    path('statFilmyGwiazdkiMaxMin/', statFilmyGwiazdkiMaxMin.as_view(), name='statFilmyGwiazdkiMaxMin'),
+
 ]
 
