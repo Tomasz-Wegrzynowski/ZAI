@@ -19,9 +19,10 @@ from django.urls import path, include
 from rest_framework.authtoken import views
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
+from graphql_jwt.decorators import jwt_cookie
 
 urlpatterns = [
-    path("graphql",  csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path("graphql",  jwt_cookie(GraphQLView.as_view(graphiql=True))),
     path('api-token-auth/', views.obtain_auth_token),
     path("admin/", admin.site.urls),
     path("filmy/", include('zaiapp.urls')),
