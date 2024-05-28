@@ -24,6 +24,8 @@ class Film(models.Model):
     def tytul_z_rokiem(self):
         return "{} ({})".format(self.tytul, str(self.rok))
 
+    class Meta:
+        ordering = ['tytul']
 
 class ExtraInfo(models.Model):
     GATUNEK = {

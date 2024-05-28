@@ -1,8 +1,12 @@
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.auth.models import User
+from graphql_relay import from_global_id
+
 from .models import Film, ExtraInfo, Ocena, Aktor
 import graphql_jwt
+from graphene import relay, InputObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 class FilmType(DjangoObjectType):
     class Meta:
@@ -11,6 +15,16 @@ class FilmType(DjangoObjectType):
 
     stary_nowy_film = graphene.String(default_value="")
     rok2 = graphene.Int()
+
+class FilmNode(DjangoObjectType):
+    class Meta:
+        model = Film
+        filter_fields = {
+            'tytul': ['exact','contains','startswith'],
+            'rok': ['exact']
+        }
+        interfaces = (relay.Node, )
+
 
 class UserType(DjangoObjectType):
     class Meta:
@@ -45,33 +59,38 @@ class Filters(graphene.InputObjectType):
     rok_mniejszy_od = graphene.Int(default_value=2000)
     nazwisko_aktora = graphene.String(default_value="")
 
+class FilmFilter(InputObjectType):
+    tytul_contains = graphene.String(default_value="")
+
 class Query(graphene.ObjectType):
-    filmy = graphene.List(FilmType, filters=Filters())
-    aktorzy = graphene.List(AktorType, filters=Filters())
+    #filmy = graphene.List(FilmType, filters=Filters())
+    #aktorzy = graphene.List(AktorType, filters=Filters())
+    filmy = DjangoFilterConnectionField(FilmNode)
+    film_wg_id = relay.Node.Field(FilmNode)
 
-    def resolve_filmy(root, info, filters):
-        filmy = Film.objects.all()
-        for f in filmy:
-            if f.rok < filters.rok_mniejszy_od:
-                f.stary_nowy_film = "Stary film"
-            else:
-                f.stary_nowy_film = "Nowy film"
-        if len(filters.tytul_zawiera) > 0:
-            films = Film.objects.filter(tytul__contains=filters.tytul_zawiera)
-            for f in films:
-                if f.rok < filters.rok_mniejszy_od:
-                    f.stary_nowy_film = "Stary film"
-                else:
-                    f.stary_nowy_film = "Nowy film"
-            return films
-        return filmy
+    #def resolve_filmy(root, info, filters):
+    #    filmy = Film.objects.all()
+    #    for f in filmy:
+    #        if f.rok < filters.rok_mniejszy_od:
+    #            f.stary_nowy_film = "Stary film"
+    #        else:
+    #            f.stary_nowy_film = "Nowy film"
+    #    if len(filters.tytul_zawiera) > 0:
+    #        films = Film.objects.filter(tytul__contains=filters.tytul_zawiera)
+    #        for f in films:
+    #            if f.rok < filters.rok_mniejszy_od:
+    #                f.stary_nowy_film = "Stary film"
+    #            else:
+    #                f.stary_nowy_film = "Nowy film"
+    #        return films
+    #    return filmy
 
 
-    def resolve_film_wg_id(root, info, id):
-        f = Film.objects.get(pk=id)
-        f.rok2 = int(f.rok) + 10
+    #def resolve_film_wg_id(root, info, id):
+    #    f = Film.objects.get(pk=id)
+    #    f.rok2 = int(f.rok) + 10
 
-        return f
+    #    return f
 
 
     def resolve_extrainfo(root, info):
@@ -161,7 +180,25 @@ class FilmDeleteMutation(graphene.Mutation):
         return FilmDeleteMutation(film=film)
 
 
+class FilmUpdateMutationRelay(relay.ClientIDMutation):
+    class Input:
+        tytul = graphene.String(required=True)
+        id = graphene.ID()
+
+    film = graphene.Field(FilmType)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, tytul, id):
+        film = Film.objects.get(pk=from_global_id(id)[1])
+        film.tytul = tytul
+        film.save()
+
+        # Zwracamy instancję tej mutacji
+        return FilmUpdateMutationRelay(film=film)
+
 class Mutation(graphene.ObjectType):
+    update_film = FilmUpdateMutation.Field()
+    update_film_relay = FilmUpdateMutationRelay.Field()
     create_film = FilmCreateMutation.Field()
     update_film = FilmUpdateMutation.Field()
     delete_film = FilmDeleteMutation.Field()
